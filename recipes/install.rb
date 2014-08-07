@@ -15,23 +15,23 @@
 # limitations under the License.
 #
 
-include_recipe 'ark'
 
 install_arch = node[:kernel][:machine] =~ /x86_64/ ? 'amd64' : '386'
 install_version = [node[:consul][:version], node[:os], install_arch].join('_')
 install_checksum = node[:consul][:checksums].fetch(install_version)
 
-ark 'consul' do
-  path node[:consul][:install_dir]
-  version node[:consul][:version]
-  checksum install_checksum
-  url URI.join(node[:consul][:base_url], "#{install_version}.zip").to_s
-  action :dump
-end
+package "unzip"
 
-file "#{node[:consul][:install_dir]}/consul" do
-  mode '0755'
-  action :touch
+bash "Fetch consul for #{install_version}" do
+  code <<EOC
+set -e
+d=$(mktemp -d /tmp/consul-XXXXXX)
+cd $d
+curl -f -L -O '#{node[:consul][:base_url]}/#{install_version}.zip'
+echo '#{install_checksum}  #{install_version}.zip' > sha256sums
+sha256sum -c --status sha256sums
+unzip "#{install_version}.zip"
+mv consul /usr/local/bin
+EOC
 end
-
 include_recipe 'consul::_service'

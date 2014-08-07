@@ -13,16 +13,19 @@
 # limitations under the License.
 #
 
-include_recipe 'ark'
-
 install_version = [node[:consul][:version], 'web_ui'].join('_')
 install_checksum = node[:consul][:checksums].fetch(install_version)
 
-ark 'consul_ui' do
-  name ''
-  path node[:consul][:ui_dir]
-  version node[:consul][:version]
-  checksum install_checksum
-  url URI.join(node[:consul][:base_url], "#{install_version}.zip").to_s
-  action :put
+package "unzip"
+
+bash "Fetch consul UI for #{install_version}" do
+  code <<EOC
+set -e
+mkdir -p "#{node[:consul][:ui_dir]}"
+cd "#{node[:consul][:ui_dir]}"
+curl -f -L -O '#{node[:consul][:base_url]}/#{install_version}.zip'
+echo '#{install_checksum}  #{install_version}.zip' > sha256sums
+sha256sum -c --status sha256sums
+unzip -d "#{install_version}.zip"
+EOC
 end

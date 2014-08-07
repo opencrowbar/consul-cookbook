@@ -98,34 +98,18 @@ file node[:consul][:config_dir] + '/default.json' do
   content JSON.pretty_generate(service_config, quirks_mode: true)
 end
 
-case node[:consul][:init_style]
-when 'init'
-  template '/etc/init.d/consul' do
-    source 'consul-init.erb'
-    mode 0755
-    variables(
-      consul_binary: "#{node[:consul][:install_dir]}/consul",
-      config_dir: node[:consul][:config_dir],
-    )
-    notifies :restart, 'service[consul]', :immediately
-  end
+template '/etc/init.d/consul' do
+  source 'consul-init.erb'
+  mode 0755
+  variables(
+            consul_binary: "#{node[:consul][:install_dir]}/consul",
+            config_dir: node[:consul][:config_dir],
+            )
+  notifies :restart, 'service[consul]', :immediately
+end
 
-  service 'consul' do
-    supports status: true, restart: true, reload: true
-    action [:enable, :start]
-    subscribes :restart, "file[#{node[:consul][:config_dir]}/default.json]", :delayed
-  end
-when 'runit'
-  include_recipe 'runit'
-
-  runit_service 'consul' do
-    supports status: true, restart: true, reload: true
-    action [:enable, :start]
-    subscribes :restart, "file[#{node[:consul][:config_dir]}/default.json]", :immediately
-    log true
-    options(
-      consul_binary: "#{node[:consul][:install_dir]}/consul",
-      config_dir: node[:consul][:config_dir],
-    )
-  end
+service 'consul' do
+  supports status: true, restart: true, reload: true
+  action [:enable, :start]
+  subscribes :restart, "file[#{node[:consul][:config_dir]}/default.json]", :delayed
 end

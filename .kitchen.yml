@@ -12,12 +12,6 @@ platforms:
     attributes:
       golang:
         install_dir: '/usr'
-  - name: centos-5.10
-    run_list:
-      - recipe[yum-repoforge::default]
-    attributes:
-      golang:
-        install_dir: '/usr'
 
 suites:
   - name: default
