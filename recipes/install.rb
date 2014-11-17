@@ -20,7 +20,9 @@ install_arch = node[:kernel][:machine] =~ /x86_64/ ? 'amd64' : '386'
 install_version = [node[:consul][:version], node[:os], install_arch].join('_')
 install_checksum = node[:consul][:checksums].fetch(install_version)
 
-package "unzip"
+package "unzip" do
+  not_if "which unzip"
+end
 
 bash "Fetch consul for #{install_version}" do
   code <<EOC
