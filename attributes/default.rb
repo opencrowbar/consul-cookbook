@@ -17,7 +17,7 @@
 
 default[:consul][:base_url] = 'https://dl.bintray.com/mitchellh/consul/'
 default[:consul][:version] = '0.4.1'
-default[:consul][:install_dir] = '/usr/local/bin'
+default[:consul][:install_dir] = (node[:platform] == 'coreos' ? '/opt/bin' : '/usr/local/bin')
 default[:consul][:checksums] = {
   '0.4.1_darwin_amd64' => '957fe9ba27bbaf99539cd534db8ac8ec4c9fa1c6b3b4675d0c0eb3a7fbfb646c',
   '0.4.1_linux_386'    => 'a496d6fd8ff5b460aea50be5d20fbd95cb5d30e9018259a0540273a17fae1c25',

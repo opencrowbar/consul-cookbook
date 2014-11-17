@@ -98,14 +98,28 @@ file node[:consul][:config_dir] + '/default.json' do
   content JSON.pretty_generate(service_config, quirks_mode: true)
 end
 
-template '/etc/init.d/consul' do
-  source 'consul-init.erb'
-  mode 0755
-  variables(
-            consul_binary: "#{node[:consul][:install_dir]}/consul",
-            config_dir: node[:consul][:config_dir],
-            )
-  notifies :restart, 'service[consul]', :immediately
+if node[:platform] == "coreos"
+  template '/etc/systemd/system/consul.service' do
+    source 'consul-systemd.erb'
+    mode 0755
+    variables(
+              user: consul_user,
+              group: consul_group,
+              consul_binary: "#{node[:consul][:install_dir]}/consul",
+              config_dir: node[:consul][:config_dir],
+              )
+    notifies :restart, 'service[consul]', :immediately
+  end
+else
+  template '/etc/init.d/consul' do
+    source 'consul-init.erb'
+    mode 0755
+    variables(
+              consul_binary: "#{node[:consul][:install_dir]}/consul",
+              config_dir: node[:consul][:config_dir],
+              )
+    notifies :restart, 'service[consul]', :immediately
+  end
 end
 
 service 'consul' do

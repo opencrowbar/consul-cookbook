@@ -19,9 +19,7 @@
 install_arch = node[:kernel][:machine] =~ /x86_64/ ? 'amd64' : '386'
 install_version = [node[:consul][:version], node[:os], install_arch].join('_')
 install_checksum = node[:consul][:checksums].fetch(install_version)
-
-bin_path = "/usr/local/bin"
-bin_path = "/opt/bin" if node[:platform] == "coreos"
+install_dir = node[:consul][:install_dir]
 
 package "unzip" do
   not_if "which unzip"
@@ -36,7 +34,7 @@ curl -f -L -O '#{node[:consul][:base_url]}/#{install_version}.zip'
 echo '#{install_checksum}  #{install_version}.zip' > sha256sums
 sha256sum -c --status sha256sums
 unzip "#{install_version}.zip"
-mv consul #{bin_path}
+mv consul #{install_dir}
 EOC
 end
 include_recipe 'consul::_service'
