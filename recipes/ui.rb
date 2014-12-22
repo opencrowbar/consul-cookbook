@@ -26,6 +26,8 @@ cd "#{node[:consul][:ui_dir]}"
 curl -f -L -O '#{node[:consul][:base_url]}/#{install_version}.zip'
 echo '#{install_checksum}  #{install_version}.zip' > sha256sums
 sha256sum -c --status sha256sums
-unzip -d "#{install_version}.zip"
+unzip "#{install_version}.zip"
+mv dist/* .
+rm -rf dist
 EOC
 end
