@@ -16,7 +16,9 @@
 install_version = [node[:consul][:version], 'web_ui'].join('_')
 install_checksum = node[:consul][:checksums].fetch(install_version)
 
-package "unzip"
+package "unzip" do
+  not_if "which unzip"
+end
 
 bash "Fetch consul UI for #{install_version}" do
   code <<EOC
